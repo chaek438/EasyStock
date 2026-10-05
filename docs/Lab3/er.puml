@@ -1,0 +1,72 @@
+@startuml
+hide circle
+skinparam linetype ortho
+entity users { *id : INTEGER <<PK>>
+  name : TEXT
+  email : TEXT <<UNIQUE>>
+  password_hash : TEXT
+  role : admin|keeper|manager
+  active : BOOLEAN
+}
+entity auth_sessions { *token_hash : TEXT <<PK>>
+  user_id : INTEGER <<FK>>
+  csrf : TEXT
+  expires_at : DATETIME
+}
+entity categories { *id : INTEGER <<PK>>
+  name : TEXT <<UNIQUE>>
+  name_key : TEXT <<UNIQUE>>
+}
+entity suppliers { *id : INTEGER <<PK>>
+  name : TEXT
+  phone : TEXT
+  email : TEXT
+}
+entity products { *id : INTEGER <<PK>>
+  sku : TEXT <<UNIQUE>>
+  name : TEXT
+  name_search : TEXT
+  category_id : INTEGER <<FK NOT NULL>>
+  supplier_id : INTEGER <<FK>>
+  price_cents : INTEGER <<CHECK >=0>>
+  min_stock : INTEGER <<CHECK >=0>>
+  archived : BOOLEAN
+}
+entity stock { *id : INTEGER <<PK>>
+  product_id : INTEGER <<FK UNIQUE>>
+  quantity : INTEGER <<CHECK >=0>>
+}
+entity stock_movements { *id : INTEGER <<PK>>
+  product_id : INTEGER <<FK>>
+  user_id : INTEGER <<FK>>
+  receipt_id : INTEGER <<FK>>
+  type : receipt|writeoff
+  quantity : INTEGER <<CHECK >0>>
+  balance_after : INTEGER <<CHECK >=0>>
+  created_at : DATETIME
+  note : TEXT
+}
+entity receipts { *id : INTEGER <<PK>>
+  supplier_id : INTEGER <<FK>>
+  user_id : INTEGER <<FK>>
+  created_at : DATETIME
+  note : TEXT
+}
+entity receipt_items { *id : INTEGER <<PK>>
+  receipt_id : INTEGER <<FK>>
+  product_id : INTEGER <<FK>>
+  quantity : INTEGER <<CHECK >0>>
+  price_cents : INTEGER <<CHECK >=0>>
+}
+users ||--o{ auth_sessions
+users ||--o{ stock_movements
+users ||--o{ receipts
+categories ||--o{ products
+suppliers |o--o{ products
+suppliers |o--o{ receipts
+products ||--|| stock
+products ||--o{ stock_movements
+products ||--o{ receipt_items
+receipts ||--|{ receipt_items
+receipts |o--o{ stock_movements
+@enduml

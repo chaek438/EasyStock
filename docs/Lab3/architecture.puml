@@ -1,0 +1,67 @@
+@startuml context
+left to right direction
+actor "Адміністратор" as Admin
+actor "Комірник" as Keeper
+actor "Менеджер" as Manager
+rectangle EasyStock {
+  component "React UI" as UI
+  component "Flask REST API" as API
+  database SQLite as DB
+  UI --> API : JSON/HTTP
+  API --> DB : SQLAlchemy
+}
+Admin --> UI
+Keeper --> UI
+Manager --> UI
+@enduml
+
+@startuml components
+component "React UI" as UI
+package "Flask API" {
+  component "Auth Service" as Auth
+  component "Product / Directory Service" as Products
+  component "Stock Service" as Stock
+  component "Admin / User Service" as Admin
+  component "Data Layer (SQLAlchemy)" as Repo
+}
+database SQLite as DB
+UI --> Auth
+UI --> Products
+UI --> Stock
+UI --> Admin
+Products --> Auth : роль
+Stock --> Auth : роль + CSRF
+Admin --> Auth : роль
+Auth --> Repo
+Products --> Repo
+Stock --> Repo : транзакція
+Admin --> Repo
+Repo --> DB
+@enduml
+
+@startuml receipt_sequence
+actor Комірник as K
+participant "React UI" as UI
+participant "Auth / API" as API
+participant "Stock Service" as S
+database SQLite as DB
+K -> UI : Товар, quantity=20
+UI -> API : POST /api/stock/receipt + CSRF
+API -> API : Сеанс, роль, CSRF
+API -> S : Дані + user
+S -> S : Валідація товарів і кількостей
+alt коректні дані
+  S -> DB : INSERT Receipt
+  S -> DB : UPDATE Stock quantity=quantity+20
+  S -> DB : INSERT ReceiptItem + StockMovement
+  S -> DB : COMMIT
+  S --> API : Новий залишок
+  API --> UI : 201 success
+  UI --> K : stock=37, посилання на історію
+else помилка / конфлікт
+  S -> DB : ROLLBACK
+  S --> API : ApiError
+  API --> UI : 400 / 404 / 409
+  UI --> K : Причина, поля збережені
+end
+@enduml
