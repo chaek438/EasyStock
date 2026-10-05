@@ -1,0 +1,31 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+pytest-of-root/
+.coverage
+htmlcov/
+
+# Frontend dependencies; frontend/dist stays in Git for the demo launcher
+node_modules/
+
+# Local SQLite databases and their sidecar files
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Local settings and logs
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
