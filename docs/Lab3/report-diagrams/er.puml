@@ -1,0 +1,95 @@
+@startuml
+title EasyStock ER Model
+hide circle
+skinparam linetype ortho
+entity users {
+ * id : INTEGER <<PK>>
+ --
+ email : VARCHAR <<UNIQUE>>
+ password_hash : VARCHAR
+ role : admin keeper manager
+ active : BOOLEAN
+}
+entity auth_sessions {
+ * token_hash : SHA256 <<PK>>
+ --
+ user_id : INTEGER <<FK NOT NULL>>
+ csrf : VARCHAR
+ expires_at : DATETIME
+}
+entity categories {
+ * id : INTEGER <<PK>>
+ --
+ name : VARCHAR <<UNIQUE>>
+ name_key : VARCHAR <<UNIQUE>>
+}
+entity suppliers {
+ * id : INTEGER <<PK>>
+ --
+ name : VARCHAR
+ phone : VARCHAR
+ email : VARCHAR
+}
+entity products {
+ * id : INTEGER <<PK>>
+ --
+ sku : VARCHAR <<UNIQUE>>
+ category_id : INTEGER <<FK NOT NULL>>
+ supplier_id : INTEGER <<FK NULL>>
+ price_cents : INTEGER >=0
+ min_stock : INTEGER >=0
+ archived : BOOLEAN
+ name_search : VARCHAR <<INDEX>>
+}
+entity stock {
+ * id : INTEGER <<PK>>
+ --
+ product_id : INTEGER <<FK UNIQUE NOT NULL>>
+ quantity : INTEGER >=0
+}
+entity receipts {
+ * id : INTEGER <<PK>>
+ --
+ supplier_id : INTEGER <<FK NULL>>
+ user_id : INTEGER <<FK NOT NULL>>
+ created_at : UTC DATETIME
+ note : VARCHAR
+}
+entity receipt_items {
+ * id : INTEGER <<PK>>
+ --
+ receipt_id : INTEGER <<FK NOT NULL>>
+ product_id : INTEGER <<FK NOT NULL>>
+ quantity : INTEGER >0
+ price_cents : INTEGER >=0
+}
+entity stock_movements {
+ * id : INTEGER <<PK>>
+ --
+ product_id : INTEGER <<FK NOT NULL>>
+ user_id : INTEGER <<FK NOT NULL>>
+ receipt_id : INTEGER <<FK NULL>>
+ type : receipt writeoff
+ quantity : INTEGER >0
+ balance_after : INTEGER >=0
+ created_at : UTC DATETIME
+ note : VARCHAR
+}
+categories ||--o{ products : "1"
+suppliers |o--o{ products : "2"
+products ||--o| stock : "3"
+users ||--o{ auth_sessions : "4"
+suppliers |o--o{ receipts : "5"
+users ||--o{ receipts : "6"
+receipts ||--o{ receipt_items : "7"
+products ||--o{ receipt_items : "8"
+products ||--o{ stock_movements : "9"
+users ||--o{ stock_movements : "10"
+receipts |o--o{ stock_movements : "11"
+note bottom
+Фізичні кардинальності БД.
+API створює один stock для кожного товару
+та 1–50 позицій для надходження.
+Єдиний автор: Бондаренко Сергій, 3ІПЗс.
+end note
+@enduml

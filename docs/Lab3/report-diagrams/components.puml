@@ -1,0 +1,29 @@
+@startuml
+title EasyStock Components and Deployment
+component "React UI
+Браузер" as UI
+node "Flask / Waitress
+Один серверний процес" {
+  component Auth
+  component Products
+  component "Stock Service" as StockService
+  component Admin
+  component "Data layer SQLAlchemy" as Data
+  Auth --> Data
+  Products --> Data
+  StockService --> Data
+  Admin --> Data
+}
+database "SQLite
+FK UNIQUE CHECK
+WAL busy_timeout" as DB
+UI --> Auth : HTTP / JSON /api
+UI --> Products
+UI --> StockService
+UI --> Admin
+Data --> DB : транзакції
+note bottom
+Один origin; Flask віддає frontend/dist.
+Усі компоненти реалізовано самостійно: Бондаренко Сергій.
+end note
+@enduml

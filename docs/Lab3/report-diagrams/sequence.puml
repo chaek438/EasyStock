@@ -1,0 +1,30 @@
+@startuml
+title EasyStock Critical Writeoff
+actor "Комірник" as Keeper
+participant "React UI" as UI
+participant "Flask / Stock Service" as API
+database SQLite as DB
+Keeper -> UI : SSD-480, quantity=40
+UI -> API : POST /api/stock/writeoff + CSRF
+API -> API : роль, товар, ціла кількість >0
+API -> DB : UPDATE stock WHERE quantity >=40
+DB --> API : 0 rows; available=37
+API --> UI : 409; stock=37, no movement
+UI -> UI : error; зберегти поля
+Keeper -> UI : виправити quantity=3
+UI -> API : POST /api/stock/writeoff
+API -> DB : conditional UPDATE 37-3
+API -> DB : INSERT movement
+alt усі записи успішні
+  API -> DB : COMMIT
+  DB --> API : stock=34
+  API --> UI : 201 success, stock=34
+else помилка запису аудиту
+  API -> DB : ROLLBACK
+  API --> UI : error; stock і history без змін
+end
+note bottom
+Єдиний автор: Бондаренко Сергій, 3ІПЗс.
+Повтор POST після невідомого результату потребує звірки історії.
+end note
+@enduml
