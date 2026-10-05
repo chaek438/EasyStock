@@ -1,0 +1,16 @@
+@startuml
+title EasyStock Context
+left to right direction
+actor "Комірник" as Keeper
+actor "Менеджер" as Manager
+actor "Адміністратор" as Admin
+rectangle "EasyStock
+Вебсистема складського обліку" as System
+Keeper --> System : надходження і списання
+Manager --> System : товари та історія
+Admin --> System : каталог і доступ
+note right of System
+Зовнішніх сервісів у MVP немає.
+Єдиний розробник: Бондаренко Сергій, 3ІПЗс.
+end note
+@enduml
