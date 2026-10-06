@@ -18,6 +18,24 @@
 
 [Дошка GitHub Projects](https://github.com/users/chaek438/projects/2/views/1) доступна для перегляду за посиланням. Вона містить 14 задач із критеріями завершення, посиланнями на докази та єдиним виконавцем `chaek438` — Бондаренком Сергієм. Колонки: **Backlog → To Do → In Progress → Review/Test → Done**. Дошку пов’язано з EasyStock; [план задач](docs/PROJECT_BOARD.md) описує поточний стан.
 
+## Скріншоти та прототип
+
+[Усі зображення з описами](docs/screenshots/README.md). У трьох звітах Word і PDF додано скріншоти опублікованих матеріалів GitHub із підписами та посиланнями на джерела.
+
+### Репозиторій та задачі
+
+![README EasyStock з автором і звітами](docs/screenshots/github-repository.jpg)
+
+![Усі 14 задач та єдиний виконавець chaek438](docs/screenshots/github-project-tasks.jpg)
+
+### Статичні екрани прототипу
+
+Це навчальні ескізи з клікабельного прототипу. Скріншоти запущеного EasyStock потрібно додати після локального демопрогону.
+
+![Прототип каталогу товарів](docs/screenshots/prototype-products.png)
+
+![Прототип стану помилки списання](docs/screenshots/prototype-writeoff.png)
+
 ## Про застосунок
 
 Українська вебсистема складського обліку за вимогами з архіву `EasyStock_all_PDF.zip`.
