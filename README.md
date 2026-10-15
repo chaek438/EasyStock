@@ -58,7 +58,16 @@ cd EasyStock
 
 ### Windows
 
-Двічі натисніть **`run_demo.bat`** у папці EasyStock. Після встановлення залежностей відкрийте **http://127.0.0.1:5000**. Якщо команда `python` недоступна, встановіть Python з опцією «Add Python to PATH».
+Двічі натисніть **`run_demo.bat`** у папці EasyStock. Скрипт перевіряє Python 3.11+, за потреби створює `.venv` і відновлює відсутній pip через `ensurepip`. Для створення середовища підтримуються команди `py -3` та `python`. Після встановлення залежностей відкрийте **http://127.0.0.1:5000**. На першому запуску потрібен Інтернет для завантаження залежностей.
+
+Якщо стара копія повідомляє `No module named pip`, відкрийте PowerShell у папці проєкту та виконайте:
+
+```powershell
+.\.venv\Scripts\python.exe -m ensurepip --upgrade --default-pip
+.\run_demo.bat
+```
+
+`ensurepip` відновлює pip із компонентів Python без завантаження стороннього скрипта. Якщо відсутній і модуль `ensurepip`, відновіть встановлення Python з підтримкою pip. Офіційна документація: https://docs.python.org/3/library/ensurepip.html.
 
 ### Linux / macOS
 
