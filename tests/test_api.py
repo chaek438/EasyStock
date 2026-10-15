@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 import pytest
 from sqlalchemy import event, func
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from werkzeug.security import check_password_hash
 from easystock.models import db, User, Product, Stock, StockMovement, Receipt, ReceiptItem, AuthSession, now
 
@@ -114,6 +114,25 @@ def test_failure_between_stock_and_audit_rolls_back(app, admin):
     try:
         response = client.post('/api/stock/receipt', json={'product_id':1,'quantity':20}, headers=headers)
         assert response.status_code == 409
+    finally:
+        event.remove(StockMovement, 'before_insert', fail)
+    assert product(client)['quantity'] == 17 and counts(app) == before
+
+
+def test_database_failure_returns_503_and_rolls_back(app, admin):
+    client, headers = admin
+    before = counts(app)
+
+    def fail(*args):
+        raise OperationalError('private-test-database-path', {}, Exception('database unavailable'))
+
+    event.listen(StockMovement, 'before_insert', fail)
+    try:
+        response = client.post('/api/stock/receipt', json={'product_id': 1, 'quantity': 20}, headers=headers)
+        assert response.status_code == 503
+        assert 'тимчасово недоступна' in response.json['error']
+        assert 'private-test-database-path' not in response.get_data(as_text=True)
+        assert 'OperationalError' not in response.get_data(as_text=True)
     finally:
         event.remove(StockMovement, 'before_insert', fail)
     assert product(client)['quantity'] == 17 and counts(app) == before
