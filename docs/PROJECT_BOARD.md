@@ -2,7 +2,7 @@
 
 Виконав: Бондаренко Сергій
 
-Усі завдання виконує один автор. Публічну [дошку GitHub Projects](https://github.com/users/chaek438/projects/2/views/1) створено та пов’язано з EasyStock. На дошці 14 карток із критеріями завершення, посиланнями на докази та єдиним виконавцем `chaek438` — Бондаренком Сергієм. Стан плану: 06.10.2026.
+Усі завдання виконує один автор. Публічну [дошку GitHub Projects](https://github.com/users/chaek438/projects/2/views/1) створено та пов’язано з EasyStock. У базовому плані 14 карток із критеріями завершення, посиланнями на докази та єдиним виконавцем `chaek438` — Бондаренком Сергієм. Базовий стан: 06.10.2026; ітерацію I1 додано 15.10.2026.
 
 Колонки: **Backlog → To Do → In Progress → Review/Test → Done**.
 
@@ -30,3 +30,21 @@
 Завершено 10 задач, 3 перевірки залишаються у To Do, експорт CSV — у Backlog. Дати початку, інтерв’ю, сторонні учасники та історія переходів не вигадувалися.
 
 Картки створено як draft items без окремих Issues. Кожна містить «Виконав: Бондаренко Сергій», відповідний критерій завершення та посилання на звіт, код або план перевірки. За потреби викладача їх можна перетворити на Issues.
+
+
+## Ітерація I1 для практичних 4–5
+
+На дошці додано 8 карток I1-T1–I1-T8: оцінки 15 годин сумарно, плановий резерв 5 годин. Власник і виконавець усіх задач — chaek438, Бондаренко Сергій. To Do відповідає Ready, WIP активної роботи ≤1.
+
+[План](Lab4/Iteration_Plan.md) · [Критерії карток](Lab4/Iteration_Board.md) · [Ризики](Lab4/Risk_Register.md).
+
+- [I1-T1: Уточнити критерії та правила ітерації](https://github.com/users/chaek438/projects/2/views/1?pane=issue&itemId=272975714) — 1 год.
+- [I1-T2: Підготувати ізольовану демобазу і baseline](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977176) — 2 год.
+- [I1-T3: Додати наскрізний HTTP smoke test](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977332) — 3 год.
+- [I1-T4: Перевірити помилки доступ і persistence](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977340) — 3 год.
+- [I1-T5: Повторити React DOM і production збірку](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977344) — 2 год.
+- [I1-T6: Оформити гілку PR і самоперевірку](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977347) — 1.5 год.
+- [I1-T7: Повторити smoke test після інтеграції](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977357) — 1.5 год.
+- [I1-T8: Оформити докази та сценарій демонстрації](https://github.com/users/chaek438/projects/2/views/1?filterQuery=I1-T&pane=issue&itemId=272977365) — 1 год.
+
+Докази реалізації: [issue №1](https://github.com/chaek438/EasyStock/issues/1), [merged PR №2](https://github.com/chaek438/EasyStock/pull/2), [журнали](Lab5/evidence/), 40 API-тестів, build, 18 HTTP/DOM-перевірок до merge і 17 HTTP-перевірок після merge. Фактичний статус кожної картки показує публічна дошка. Незалежний review, людський walkthrough і перевірки верстки залишаються окремими невиконаними задачами базового плану.
