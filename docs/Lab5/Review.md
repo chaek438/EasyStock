@@ -17,3 +17,5 @@ Issue: https://github.com/chaek438/EasyStock/issues/1
 ## Межі висновку
 
 Це письмова самоперевірка одного автора. Незалежний review іншою людиною не підтверджено. React DOM не є перевіркою верстки або Chromium/Firefox. Повторний POST не має idempotency key. Жодних фіктивних учасників або схвалень не додано.
+
+Pull request: https://github.com/chaek438/EasyStock/pull/2
