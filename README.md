@@ -2,7 +2,7 @@
 
 Виконав: Бондаренко Сергій
 
-Група: 3ІПЗс. Формат роботи — індивідуальний; усі ролі розробки поєднував один виконавець.
+Група: 3ІПЗс-24. Формат роботи — індивідуальний; усі ролі розробки поєднував один виконавець.
 
 Репозиторій: [github.com/chaek438/EasyStock](https://github.com/chaek438/EasyStock).
 
@@ -13,10 +13,31 @@
 | Практична 1 | [Звіт 1](docs/Lab1/Report.pdf) | [Word 1](docs/Lab1/Report.docx) |
 | Практична 2 | [Звіт 2](docs/Lab2/Report.pdf) | [Word 2](docs/Lab2/Report.docx) |
 | Практична 3 | [Звіт 3](docs/Lab3/Report.pdf) | [Word 3](docs/Lab3/Report.docx) |
+| Практична 4 | [Звіт 4](docs/Lab4/Report.pdf) | [Word 4](docs/Lab4/Report.docx) |
+| Практична 5 | [Звіт 5](docs/Lab5/Report.pdf) | [Word 5](docs/Lab5/Report.docx) |
 
 [Прототип інтерфейсу](docs/Lab3/prototype.html) потрібно завантажити й відкрити у браузері.
 
-[Дошка GitHub Projects](https://github.com/users/chaek438/projects/2/views/1) доступна для перегляду за посиланням. Вона містить 14 задач із критеріями завершення, посиланнями на докази та єдиним виконавцем `chaek438` — Бондаренком Сергієм. Колонки: **Backlog → To Do → In Progress → Review/Test → Done**. Дошку пов’язано з EasyStock; [план задач](docs/PROJECT_BOARD.md) описує поточний стан.
+[Дошка GitHub Projects](https://github.com/users/chaek438/projects/2/views/1) доступна для перегляду за посиланням. Вона містить 14 задач базового плану та 8 задач ітерації I1 із критеріями завершення, посиланнями на докази та єдиним виконавцем `chaek438` — Бондаренком Сергієм. Колонки: **Backlog → To Do → In Progress → Review/Test → Done**. Дошку пов’язано з EasyStock; [план задач](docs/PROJECT_BOARD.md) описує поточний стан.
+
+## План ітерації та перевірка MVP
+
+[План I1](docs/Lab4/Iteration_Plan.md), [sprint backlog](docs/Lab4/Sprint_Backlog.csv), [реєстр ризиків](docs/Lab4/Risk_Register.md), [протокол](docs/Lab4/Planning_Protocol.md).
+
+Ізольована перевірка сама запускає сервер і тимчасову SQLite базу:
+
+~~~bash
+# Windows
+.venv\Scripts\python.exe scripts\smoke_mvp.py
+# Linux / macOS
+.venv/bin/python scripts/smoke_mvp.py
+~~~
+
+Додайте --with-ui для React DOM після npm ci у frontend. Нові докази: [40 API-тестів](docs/Lab5/evidence/pytest.txt), [18 HTTP/DOM-перевірок](docs/Lab5/evidence/smoke-before-merge.json), [самоперевірка](docs/Lab5/Review.md). Незалежний review і людський walkthrough мають окремий фактичний статус.
+
+.env.example є довідкою: start.py автоматично не завантажує .env; задавайте DATABASE_URL та COOKIE_SECURE у середовищі процесу.
+
+[Issue №1](https://github.com/chaek438/EasyStock/issues/1) · [Pull request №2](https://github.com/chaek438/EasyStock/pull/2).
 
 ## Про застосунок
 
@@ -178,7 +199,7 @@ EasyStock/
   frontend/dist/         готовий інтерфейс для запуску
   database/schema.sql    схема БД; робоча БД створюється при запуску
   tests/                 API, транзакції, паралельні списання, браузерні тести
-  docs/Lab1..Lab3/        вихідні звіти та артефакти реалізації
+  docs/Lab1..Lab5/        вихідні звіти та артефакти реалізації
   docs/adr/              архітектурні рішення
   docs/API.md            контракт API
   docs/EasyStock.postman_collection.json   колекція API-запитів
