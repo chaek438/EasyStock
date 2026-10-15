@@ -1,0 +1,95 @@
+{
+  "started_at": "2026-10-15T20:10:24.013208+00:00",
+  "checks": [
+    {
+      "name": "HTTP health endpoint",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "HTML and compiled frontend are served",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "Unauthenticated catalogue is denied",
+      "status": "PASS",
+      "http": 401
+    },
+    {
+      "name": "Incorrect password is denied",
+      "status": "PASS",
+      "http": 401
+    },
+    {
+      "name": "Keeper login and CSRF token",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "SKU search and initial stock",
+      "status": "PASS",
+      "balance": 17
+    },
+    {
+      "name": "Missing CSRF leaves stock and audit unchanged",
+      "status": "PASS",
+      "http": 403
+    },
+    {
+      "name": "Zero quantity leaves stock and audit unchanged",
+      "status": "PASS",
+      "http": 400
+    },
+    {
+      "name": "Receipt adds 20 with one document and audit entry",
+      "status": "PASS",
+      "http": 201,
+      "balance": 37
+    },
+    {
+      "name": "Excess writeoff is rejected without database changes",
+      "status": "PASS",
+      "http": 409,
+      "balance": 37
+    },
+    {
+      "name": "Writeoff subtracts 3 and saves an audit entry",
+      "status": "PASS",
+      "http": 201,
+      "balance": 34
+    },
+    {
+      "name": "History includes author, UTC timestamp and both balances",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated reads do not duplicate stock movements",
+      "status": "PASS"
+    },
+    {
+      "name": "Full server restart preserves stock and history",
+      "status": "PASS",
+      "balance": 34
+    },
+    {
+      "name": "Manager can read but cannot change stock",
+      "status": "PASS",
+      "http": 403
+    },
+    {
+      "name": "Manager cannot read the users administration endpoint",
+      "status": "PASS",
+      "http": 403
+    },
+    {
+      "name": "Logout revokes the session",
+      "status": "PASS",
+      "http": 401
+    }
+  ],
+  "status": "PASS",
+  "browser_layout_tested": false,
+  "temporary_database_removed": true,
+  "finished_at": "2026-10-15T20:10:25.590427+00:00"
+}
