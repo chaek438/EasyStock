@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.029" timestamp="2026-11-01T10:25:02.964043+00:00" hostname="88ddb5c71e76"><testcase classname="tests.test_release" name="test_replayed_stock_request_has_one_effect[receipt-20-37]" time="0.533"><failure message="assert 57 == 37">app = &lt;Flask 'easystock'&gt;
+admin = (&lt;FlaskClient &lt;Flask 'easystock'&gt;&gt;, {'X-CSRF-Token': '[REDACTED]'})
+kind = 'receipt', quantity = 20, expected_balance = 37
+
+    @pytest.mark.parametrize('kind, quantity, expected_balance', [
+        ('receipt', 20, 37), ('writeoff', 3, 14),
+    ])
+    def test_replayed_stock_request_has_one_effect(app, admin, kind, quantity, expected_balance):
+        client, headers = admin
+        headers = {**headers, 'Idempotency-Key': 'lab6-lost-response'}
+        payload = {'product_id': 1, 'quantity': quantity, 'note': 'Lab6 retry'}
+        with app.app_context():
+            before = db.session.query(StockMovement).count()
+        first = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        retry = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        assert first.status_code == retry.status_code == 201
+&gt;       assert client.get('/api/products/1').json['quantity'] == expected_balance
+E       assert 57 == 37
+
+tests/test_release.py:18: AssertionError</failure></testcase><testcase classname="tests.test_release" name="test_replayed_stock_request_has_one_effect[writeoff-3-14]" time="0.464"><failure message="assert 11 == 14">app = &lt;Flask 'easystock'&gt;
+admin = (&lt;FlaskClient &lt;Flask 'easystock'&gt;&gt;, {'X-CSRF-Token': '[REDACTED]'})
+kind = 'writeoff', quantity = 3, expected_balance = 14
+
+    @pytest.mark.parametrize('kind, quantity, expected_balance', [
+        ('receipt', 20, 37), ('writeoff', 3, 14),
+    ])
+    def test_replayed_stock_request_has_one_effect(app, admin, kind, quantity, expected_balance):
+        client, headers = admin
+        headers = {**headers, 'Idempotency-Key': 'lab6-lost-response'}
+        payload = {'product_id': 1, 'quantity': quantity, 'note': 'Lab6 retry'}
+        with app.app_context():
+            before = db.session.query(StockMovement).count()
+        first = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        retry = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        assert first.status_code == retry.status_code == 201
+&gt;       assert client.get('/api/products/1').json['quantity'] == expected_balance
+E       assert 11 == 14
+
+tests/test_release.py:18: AssertionError</failure></testcase></testsuite></testsuites>

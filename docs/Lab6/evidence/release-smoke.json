@@ -1,0 +1,64 @@
+{
+  "started_at": "2026-11-01T10:50:12.215995+00:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "Startup without --demo creates no standard accounts",
+      "status": "PASS",
+      "users": 0
+    },
+    {
+      "name": "Startup upgrades a legacy schema without changing demo stock or audit",
+      "status": "PASS",
+      "balance": 17
+    },
+    {
+      "name": "Initial receipt commits once before a simulated discarded reply",
+      "status": "PASS",
+      "http": 201,
+      "balance": 37
+    },
+    {
+      "name": "Same key survives full restart and re-login without a second receipt",
+      "status": "PASS",
+      "http": 201,
+      "balance": 37
+    },
+    {
+      "name": "Changed intent with the same key is rejected without mutation",
+      "status": "PASS",
+      "http": 409
+    },
+    {
+      "name": "Writeoff retry preserves stock 34 and its single audit entry",
+      "status": "PASS",
+      "http": 201,
+      "balance": 34
+    },
+    {
+      "name": "Manager cannot use a known key to bypass write permissions",
+      "status": "PASS",
+      "http": 403
+    },
+    {
+      "name": "Session logout remains effective after keyed operations",
+      "status": "PASS",
+      "http": 401
+    }
+  ],
+  "source_commit": "6d7f8d951a23f205477960efdc3ec79648f6bb78",
+  "source_sha256": "d728dc96c147a7d24a13144fdcb0946cd8116ab2ec0a2908e4ff2f979cd47f00",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "python": "3.12.14",
+  "sqlite": "3.53.1",
+  "packages": {
+    "Flask": "3.1.3",
+    "Flask-SQLAlchemy": "3.1.1",
+    "SQLAlchemy": "2.0.48",
+    "waitress": "3.0.2",
+    "pytest": "9.0.2"
+  },
+  "browser_layout_tested": false,
+  "temporary_database_removed": true,
+  "finished_at": "2026-11-01T10:50:14.883992+00:00"
+}

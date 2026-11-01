@@ -1,0 +1,19 @@
+PASS 01: HTTP health endpoint
+PASS 02: HTML and compiled frontend are served
+PASS 03: Unauthenticated catalogue is denied
+PASS 04: Incorrect password is denied
+PASS 05: Keeper login and CSRF token
+PASS 06: SKU search and initial stock
+PASS 07: Missing CSRF leaves stock and audit unchanged
+PASS 08: Zero quantity leaves stock and audit unchanged
+PASS 09: Receipt adds 20 with one document and audit entry
+PASS 10: Excess writeoff is rejected without database changes
+PASS 11: Writeoff subtracts 3 and saves an audit entry
+PASS 12: History includes author, UTC timestamp and both balances
+PASS 13: Repeated reads do not duplicate stock movements
+PASS 14: Full server restart preserves stock and history
+PASS 15: Manager can read but cannot change stock
+PASS 16: Manager cannot read the users administration endpoint
+PASS 17: Logout revokes the session
+PASS 18: React DOM with real HTTP API
+PASS: 18 completed checks; browser layout is not tested.

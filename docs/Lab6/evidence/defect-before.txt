@@ -1,0 +1,50 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+__________ test_replayed_stock_request_has_one_effect[receipt-20-37] ___________
+
+app = <Flask 'easystock'>
+admin = (<FlaskClient <Flask 'easystock'>>, {'X-CSRF-Token': '[REDACTED]'})
+kind = 'receipt', quantity = 20, expected_balance = 37
+
+    @pytest.mark.parametrize('kind, quantity, expected_balance', [
+        ('receipt', 20, 37), ('writeoff', 3, 14),
+    ])
+    def test_replayed_stock_request_has_one_effect(app, admin, kind, quantity, expected_balance):
+        client, headers = admin
+        headers = {**headers, 'Idempotency-Key': 'lab6-lost-response'}
+        payload = {'product_id': 1, 'quantity': quantity, 'note': 'Lab6 retry'}
+        with app.app_context():
+            before = db.session.query(StockMovement).count()
+        first = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        retry = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        assert first.status_code == retry.status_code == 201
+>       assert client.get('/api/products/1').json['quantity'] == expected_balance
+E       assert 57 == 37
+
+tests/test_release.py:18: AssertionError
+__________ test_replayed_stock_request_has_one_effect[writeoff-3-14] ___________
+
+app = <Flask 'easystock'>
+admin = (<FlaskClient <Flask 'easystock'>>, {'X-CSRF-Token': '[REDACTED]'})
+kind = 'writeoff', quantity = 3, expected_balance = 14
+
+    @pytest.mark.parametrize('kind, quantity, expected_balance', [
+        ('receipt', 20, 37), ('writeoff', 3, 14),
+    ])
+    def test_replayed_stock_request_has_one_effect(app, admin, kind, quantity, expected_balance):
+        client, headers = admin
+        headers = {**headers, 'Idempotency-Key': 'lab6-lost-response'}
+        payload = {'product_id': 1, 'quantity': quantity, 'note': 'Lab6 retry'}
+        with app.app_context():
+            before = db.session.query(StockMovement).count()
+        first = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        retry = client.post('/api/stock/' + kind, json=payload, headers=headers)
+        assert first.status_code == retry.status_code == 201
+>       assert client.get('/api/products/1').json['quantity'] == expected_balance
+E       assert 11 == 14
+
+tests/test_release.py:18: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_release.py::test_replayed_stock_request_has_one_effect[receipt-20-37]
+FAILED tests/test_release.py::test_replayed_stock_request_has_one_effect[writeoff-3-14]
+2 failed in 1.03s
