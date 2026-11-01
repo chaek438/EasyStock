@@ -11,10 +11,18 @@ const dom=new JSDOM('<html><body><div id="root"></div></body></html>',{url:base,
 for(const key of ['window','document','location','HTMLElement','Element','Node','Event','MouseEvent','KeyboardEvent','HTMLInputElement','HTMLSelectElement','MutationObserver']) globalThis[key]=dom.window[key]
 Object.defineProperty(globalThis,'navigator',{value:dom.window.navigator,configurable:true})
 const originalFetch=globalThis.fetch
-let cookie=''
+let cookie='', loseNextStockReply=false
+const stockRequestKeys=[]
 globalThis.fetch=async(path,options={})=>{
   const result=await originalFetch(new URL(path,base),{...options,headers:{...options.headers,...(cookie?{Cookie:cookie}:{})}})
   if(result.headers.get('set-cookie')) cookie=result.headers.get('set-cookie').split(';')[0]
+  if(path==='/api/stock/receipt' && options.method==='POST') {
+    stockRequestKeys.push(options.headers?.['Idempotency-Key'])
+    if(loseNextStockReply && result.ok) {
+      loseNextStockReply=false
+      throw new TypeError('Simulated response loss after server commit')
+    }
+  }
   return result
 }
 const {screen,waitFor,within}=require('@testing-library/react')
@@ -59,11 +67,22 @@ try {
   for(const quantity of [17,20]) {
     await click('Надходження')
     await wait(()=>assert.ok(screen.getByRole('spinbutton',{name:'Кількість 1'})))
-    await input('Кількість 1',quantity,'spinbutton'); await click('Провести надходження')
+    await input('Кількість 1',quantity,'spinbutton')
+    if(quantity===17) loseNextStockReply=true
+    await click('Провести надходження')
+    if(quantity===17) {
+      await wait(()=>assert.ok(screen.getByRole('alert').textContent.includes('Повторіть операцію')))
+      assert.equal(screen.getByRole('spinbutton',{name:'Кількість 1'}).value,'17')
+      await click('Провести надходження')
+      await wait(()=>assert.equal(stockRequestKeys.length,2))
+      assert.ok(stockRequestKeys[0])
+      assert.equal(stockRequestKeys[0],stockRequestKeys[1])
+    }
     await wait(()=>assert.ok(document.querySelector('.success')?.textContent.includes(String(quantity===17?17:37))))
     await click('До товарів')
     await wait(()=>assert.ok(document.querySelector('.stock-number')?.textContent.includes(String(quantity===17?17:37))))
   }
+  assert.notEqual(stockRequestKeys[1],stockRequestKeys[2])
   await click('Списання')
   await wait(()=>assert.ok(screen.getByRole('spinbutton',{name:'Кількість 1'})))
   await input('Кількість 1',40,'spinbutton'); await input('Причина списання / коментар','Збережений коментар')
@@ -90,7 +109,7 @@ try {
   assert.ok(screen.queryByRole('link',{name:'Користувачі',exact:true})===null)
   location.hash='receipt'
   await wait(()=>assert.ok(screen.getByRole('heading',{name:'Доступ обмежено'})))
-  console.log('PASS: React DOM + real API — login, Unicode search, empty state, product creation, receipts 17+20=37, excess writeoff rejection, preserved inputs, successful writeoff, history audit, archive, logout, manager roles.')
+  console.log('PASS: React DOM + real API — login, Unicode search, empty state, product creation, lost response after commit and safe retry, receipts 17+20=37, excess writeoff rejection, preserved inputs, successful writeoff, history audit, archive, logout, manager roles.')
 } catch(error) {
   console.error('UI state:',location.hash,[...document.querySelectorAll('h1,h2,.error')].map(e=>e.textContent));
   throw error

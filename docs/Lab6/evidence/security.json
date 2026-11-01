@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "source_commit": "6d7f8d951a23f205477960efdc3ec79648f6bb78",
+  "method": "High-confidence credential patterns in Git text blobs; generated/private paths in the current index; ignore rules.",
+  "history_commits": 57,
+  "unique_blobs": 185,
+  "binary_blobs_excluded": 81,
+  "findings": [],
+  "forbidden_current_paths": [],
+  "ignore_checks": {
+    ".env": true,
+    ".venv/fixture": true,
+    "database/fixture.db": true,
+    "backend/__pycache__/fixture.pyc": true,
+    "frontend/node_modules/fixture": true
+  },
+  "limitations": [
+    "Pattern scanning is not a guarantee that all secrets are absent.",
+    "Binary historical artifacts are excluded from content scanning.",
+    "Public demo credentials are intentional and must not be used for a live warehouse."
+  ]
+}

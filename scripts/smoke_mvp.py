@@ -67,8 +67,9 @@ class Client:
 
 
 class Server:
-    def __init__(self, database, log):
+    def __init__(self, database, log, demo=True):
         self.database, self.log = database, log
+        self.demo = demo
         self.process = None
         self.base = ''
 
@@ -79,7 +80,7 @@ class Server:
         self.base = f'http://127.0.0.1:{port}'
         environment = dict(os.environ, DATABASE_URL='sqlite:///' + self.database.as_posix(), COOKIE_SECURE='0')
         self.process = subprocess.Popen(
-            [sys.executable, str(ROOT / 'start.py'), '--demo', '--port', str(port)],
+            [sys.executable, str(ROOT / 'start.py'), *(['--demo'] if self.demo else []), '--port', str(port)],
             cwd=ROOT, env=environment, stdout=self.log, stderr=subprocess.STDOUT,
         )
         deadline = time.monotonic() + 25

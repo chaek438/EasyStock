@@ -92,6 +92,18 @@ CREATE TABLE stock_movements (
 	FOREIGN KEY(receipt_id) REFERENCES receipts (id)
 );
 
+CREATE TABLE stock_requests (
+	user_id INTEGER NOT NULL,
+	request_key VARCHAR(128) NOT NULL,
+	kind VARCHAR(20) NOT NULL,
+	request_hash VARCHAR(64) NOT NULL,
+	response_data JSON,
+	created_at DATETIME NOT NULL,
+	PRIMARY KEY (user_id, request_key),
+	CHECK (kind IN ('receipt','writeoff')),
+	FOREIGN KEY(user_id) REFERENCES users (id)
+);
+
 CREATE TABLE suppliers (
 	id INTEGER NOT NULL, 
 	name VARCHAR(150) NOT NULL, 
