@@ -79,6 +79,17 @@ class Stock(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=0)
     __table_args__ = (CheckConstraint('quantity >= 0'),)
 
+class StockRequest(db.Model):
+    """A committed stock response, keyed by its author and request identifier."""
+    __tablename__ = 'stock_requests'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    request_key = db.Column(db.String(128), primary_key=True)
+    kind = db.Column(db.String(20), nullable=False)
+    request_hash = db.Column(db.String(64), nullable=False)
+    response_data = db.Column(db.JSON)
+    created_at = db.Column(db.DateTime, nullable=False, default=now)
+    __table_args__ = (CheckConstraint("kind IN ('receipt','writeoff')"),)
+
 class Receipt(db.Model):
     __tablename__ = 'receipts'
     id = db.Column(db.Integer, primary_key=True)

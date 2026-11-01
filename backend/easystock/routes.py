@@ -165,12 +165,12 @@ def delete_supplier(identifier):
 @api.post('/stock/receipt')
 @require('admin', 'keeper')
 def receipt():
-    return jsonify(movement(body(), g.user, 'receipt')), 201
+    return jsonify(movement(body(), g.user, 'receipt', request.headers.get('Idempotency-Key'))), 201
 
 @api.post('/stock/writeoff')
 @require('admin', 'keeper')
 def writeoff():
-    return jsonify(movement(body(), g.user, 'writeoff')), 201
+    return jsonify(movement(body(), g.user, 'writeoff', request.headers.get('Idempotency-Key'))), 201
 
 @api.get('/stock/history')
 @require()
