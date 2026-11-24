@@ -6,7 +6,7 @@ from pathlib import Path
 root=Path(__file__).resolve().parent
 sys.path.insert(0,str(root/'backend'))
 from easystock import create_app
-from easystock.models import db
+from easystock.schema import ensure_schema
 from easystock.seed import seed_demo
 from waitress import serve
 
@@ -19,7 +19,9 @@ if not (root/'frontend'/'dist'/'index.html').exists():
     raise SystemExit(1)
 app=create_app()
 with app.app_context():
-    db.create_all()
+    backup = ensure_schema()
+    if backup:
+        print(f'Earlier database backed up: {backup.name}', flush=True)
     if args.demo:
         if seed_demo(): print('Demo: admin@easystock.local / DemoStock2026!')
         else: print('Existing database preserved; demo seed skipped.')
