@@ -1,0 +1,8 @@
+PASS 01: Startup without --demo creates no standard accounts
+PASS 02: Startup upgrades a legacy schema without changing demo stock or audit
+PASS 03: Initial receipt commits once before a simulated discarded reply
+PASS 04: Same key survives full restart and re-login without a second receipt
+PASS 05: Changed intent with the same key is rejected without mutation
+PASS 06: Writeoff retry preserves stock 34 and its single audit entry
+PASS 07: Manager cannot use a known key to bypass write permissions
+PASS 08: Session logout remains effective after keyed operations

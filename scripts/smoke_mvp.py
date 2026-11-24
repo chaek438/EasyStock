@@ -218,6 +218,9 @@ def main():
                         require(node is not None, 'Node.js is required for --with-ui.')
                         result = subprocess.run([node, str(ROOT / 'tests/ui.mjs')], cwd=ROOT / 'frontend',
                             env=dict(os.environ, EASYSTOCK_URL=server.base), capture_output=True, text=True, timeout=90)
+                        if result.returncode:
+                            print(result.stdout[-2500:], file=sys.stderr)
+                            print(result.stderr[-4500:], file=sys.stderr)
                         require(result.returncode == 0, 'React DOM integration failed; rerun tests/ui.mjs for its diagnostics.')
                         report['checks'].append(dict(name='React DOM with real HTTP API', status='PASS'))
                         report['react_dom_output'] = result.stdout

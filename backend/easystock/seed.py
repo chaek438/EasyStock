@@ -1,12 +1,14 @@
 from datetime import timedelta
 from werkzeug.security import generate_password_hash
-from .models import db, User, Category, Supplier, Product, Stock, Receipt, ReceiptItem, StockMovement, now
+from .models import db, User, Category, Supplier, Product, Stock, Receipt, ReceiptItem, StockMovement, Warehouse, now
 
 DEMO_PASSWORD = 'DemoStock2026!'
 
 def seed_demo():
     if db.session.scalar(db.select(User.id).limit(1)):
         return False
+    if not db.session.scalar(db.select(Warehouse.id).where(Warehouse.code == 'RESERVE')):
+        db.session.add(Warehouse(code='RESERVE', name='Резервний склад', address='Демонстраційна локація'))
     users = [User(name=name, email=f'{role}@easystock.local', role=role, password_hash=generate_password_hash(DEMO_PASSWORD)) for role, name in [('admin', 'Сергій Бондаренко'), ('keeper', 'Андрій Коваленко'), ('manager', 'Олена Мельник')]]
     categories = [Category(name=n, name_key=n.casefold()) for n in ['Накопичувачі', 'Периферія', 'Комплектуючі', 'Аксесуари']]
     suppliers = [Supplier(name='TechSupply Україна', phone='+380 44 555 01 20', email='sales@techsupply.example'), Supplier(name='Дистриб’ютор IT-Line', phone='+380 67 555 03 11', email='orders@itline.example')]

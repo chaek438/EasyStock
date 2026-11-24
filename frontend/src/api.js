@@ -16,8 +16,8 @@ export async function api(path, options = {}) {
   return result
 }
 export function query(values) { return '?' + new URLSearchParams(Object.entries(values).filter(([, v]) => v !== '' && v != null)) }
-export async function allProducts() {
+export async function allProducts(warehouse_id) {
   let items = [], page = 1, result
-  do { result = await api('/products' + query({page, per_page: 100})); items.push(...result.items); page++ } while(items.length < result.total)
+  do { result = await api('/products' + query({page, warehouse_id, per_page: 100})); items.push(...result.items); page++ } while(result.items.length && items.length < result.total)
   return items
 }

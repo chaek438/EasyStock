@@ -1,0 +1,70 @@
+{
+  "checked_at": "2026-11-04T16:52:19.325837+00:00",
+  "method": "Anonymous HTTP GET without authentication or cookies; browser layout not checked",
+  "links": [
+    {
+      "name": "repository",
+      "url": "https://github.com/chaek438/EasyStock",
+      "final_url": "https://github.com/chaek438/EasyStock",
+      "status": 200,
+      "bytes": 321102,
+      "authentication_used": false
+    },
+    {
+      "name": "release",
+      "url": "https://github.com/chaek438/EasyStock/releases/tag/v1.0.0",
+      "final_url": "https://github.com/chaek438/EasyStock/releases/tag/v1.0.0",
+      "status": 200,
+      "bytes": 159741,
+      "authentication_used": false
+    },
+    {
+      "name": "backlog",
+      "url": "https://github.com/users/chaek438/projects/2/views/1",
+      "final_url": "https://github.com/users/chaek438/projects/2/views/1",
+      "status": 200,
+      "bytes": 172795,
+      "authentication_used": false
+    },
+    {
+      "name": "requirements",
+      "url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab2/Traceability.md",
+      "final_url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab2/Traceability.md",
+      "status": 200,
+      "bytes": 192679,
+      "authentication_used": false
+    },
+    {
+      "name": "architecture",
+      "url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab3/architecture.puml",
+      "final_url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab3/architecture.puml",
+      "status": 200,
+      "bytes": 210150,
+      "authentication_used": false
+    },
+    {
+      "name": "prototype",
+      "url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab3/prototype.html",
+      "final_url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab3/prototype.html",
+      "status": 200,
+      "bytes": 176294,
+      "authentication_used": false
+    },
+    {
+      "name": "tests",
+      "url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab6/TestCases.md",
+      "final_url": "https://github.com/chaek438/EasyStock/blob/main/docs/Lab6/TestCases.md",
+      "status": 200,
+      "bytes": 373156,
+      "authentication_used": false
+    },
+    {
+      "name": "pull_request",
+      "url": "https://github.com/chaek438/EasyStock/pull/3",
+      "final_url": "https://github.com/chaek438/EasyStock/pull/3",
+      "status": 200,
+      "bytes": 311403,
+      "authentication_used": false
+    }
+  ]
+}

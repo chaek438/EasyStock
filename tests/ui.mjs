@@ -27,7 +27,7 @@ globalThis.fetch=async(path,options={})=>{
 }
 const {screen,waitFor,within}=require('@testing-library/react')
 const user=require('@testing-library/user-event').default.setup({document:dom.window.document})
-const compiled=new URL('../frontend/.ui-test-build.mjs',import.meta.url)
+const compiled=new URL(`../frontend/.ui-test-build-${process.pid}.mjs`,import.meta.url)
 console.log('UI test: compiling entry');
 await build({entryPoints:[new URL('../frontend/src/main.jsx',import.meta.url).pathname],outfile:compiled.pathname,bundle:true,format:'esm',packages:'external',loader:{'.css':'empty'}})
 const wait=fn=>waitFor(fn,{timeout:10000})
@@ -110,6 +110,69 @@ try {
   location.hash='receipt'
   await wait(()=>assert.ok(screen.getByRole('heading',{name:'Доступ обмежено'})))
   console.log('PASS: React DOM + real API — login, Unicode search, empty state, product creation, lost response after commit and safe retry, receipts 17+20=37, excess writeoff rejection, preserved inputs, successful writeoff, history audit, archive, logout, manager roles.')
+
+  location.hash='documents/new'
+  await wait(()=>assert.ok(screen.getByText('Менеджер може переглядати складські документи.')))
+  await click('Вийти із системи'); await wait(()=>assert.ok(screen.getByRole('button',{name:'Адміністратор',exact:true})))
+  await click('Адміністратор'); await click('Увійти в систему')
+  await wait(()=>assert.ok(screen.getByRole('link',{name:'Склади',exact:true})))
+  await click('Склади','link')
+  await wait(()=>assert.ok(screen.getByRole('heading',{name:'Резервний склад'})))
+  await click('Додати склад')
+  const warehouseForm=within(screen.getByRole('dialog'))
+  await user.type(warehouseForm.getByLabelText('Назва складу'),'Склад UI')
+  await user.type(warehouseForm.getByLabelText(/^Код складу/),'UI-DEPOT')
+  await user.click(warehouseForm.getByRole('button',{name:'Зберегти'}))
+  await wait(()=>assert.ok(screen.getByRole('heading',{name:'Склад UI'})))
+
+  await click('Документи','link'); await wait(()=>assert.ok(screen.getByRole('link',{name:'Новий документ'})))
+  await click('Новий документ','link')
+  await wait(()=>assert.ok(screen.getByRole('combobox',{name:'Склад призначення'})))
+  const destinationField=screen.getByLabelText('Склад призначення')
+  const destination=within(destinationField).getByRole('option',{name:'Склад UI · UI-DEPOT'}).value
+  await user.selectOptions(destinationField,destination)
+  await user.selectOptions(screen.getByRole('combobox',{name:'Товар 1'}),'1')
+  await input('Кількість 1',5,'spinbutton'); await click('Зберегти чернетку')
+  await wait(()=>assert.ok(screen.getByText('Чернетка',{exact:true})))
+  async function confirm(label) {
+    await click(label)
+    await user.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Підтвердити'}))
+  }
+  await confirm('Передати на погодження')
+  await wait(()=>assert.ok(screen.getByRole('button',{name:'Провести документ'})))
+  await confirm('Провести документ')
+  await wait(()=>assert.ok(screen.getByRole('heading',{name:'Проведені рухи'})))
+  assert.ok(within(document.querySelector('.print-document')).getByText('Проведено',{exact:true}))
+  assert.ok(within(document.querySelector('.print-document')).getByText('Переміщення на склад',{exact:true}))
+
+  await user.selectOptions(screen.getByLabelText('Активний склад'),destination)
+  location.hash='products/1'
+  await wait(()=>assert.match(document.querySelector('.stock-number')?.textContent || '',/^5/))
+  await click('Документи','link');await wait(()=>assert.ok(screen.getByRole('link',{name:'Новий документ'})))
+  await click('Новий документ','link')
+  await wait(()=>assert.ok(screen.getByLabelText('Тип документа')))
+  await user.selectOptions(screen.getByLabelText('Тип документа'),'count')
+  await user.selectOptions(screen.getByRole('combobox',{name:'Товар 1'}),'1')
+  await input('Фактична кількість 1',4,'spinbutton')
+  await input('Причина підрахунку','Перерахунок під час перевірки')
+  await click('Зберегти чернетку')
+  await wait(()=>assert.ok(screen.getByRole('columnheader',{name:'Різниця'})))
+  await confirm('Передати на погодження')
+  await wait(()=>assert.ok(screen.getByRole('button',{name:'Провести документ'})))
+  await confirm('Провести документ')
+  await wait(()=>assert.ok(screen.getByText('Нестача',{exact:true})))
+  location.hash='products/1'
+  await wait(()=>assert.match(document.querySelector('.stock-number')?.textContent || '',/^4/))
+
+  await click('Імпорт і резервні копії','link')
+  await wait(()=>assert.ok(screen.getByRole('link',{name:'Завантажити копію'})))
+  const csvFile=new dom.window.File(['sku;name;category;price;min_stock;unit\nUI-CSV;Тест імпорту;Накопичувачі;15;2;шт.'], 'catalog.csv',{type:'text/csv'})
+  await user.upload(screen.getByLabelText('Файл CSV'),csvFile)
+  await click('Перевірити файл')
+  await wait(()=>assert.ok(screen.getByText('Готові до імпорту: 1 з 1. Помилки: 0.')))
+  await click('Імпортувати товари')
+  await wait(()=>assert.ok(screen.getByText('Додано товарів: 1.')))
+  console.log('PASS: Warehouse UI — creation, scoped stock, transfer, inventory approval, CSV preview/import, backup link, read-only manager role.')
 } catch(error) {
   console.error('UI state:',location.hash,[...document.querySelectorAll('h1,h2,.error')].map(e=>e.textContent));
   throw error

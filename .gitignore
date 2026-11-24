@@ -5,11 +5,13 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 pytest-of-root/
+pytest-of-*/
 .coverage
 htmlcov/
 
 # Frontend dependencies; frontend/dist stays in Git for the demo launcher
 node_modules/
+frontend/.ui-test-build-*.mjs
 
 # Local SQLite databases and their sidecar files
 *.db
@@ -21,6 +23,7 @@ node_modules/
 *.sqlite3
 *.sqlite3-wal
 *.sqlite3-shm
+backups/
 
 # Local settings and logs
 .env
