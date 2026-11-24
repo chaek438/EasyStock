@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 import re
 from flask import Blueprint, jsonify, request, g
-from sqlalchemy import func, or_, delete
+from sqlalchemy import and_, func, or_, delete
 from werkzeug.security import generate_password_hash
-from .models import db, User, Category, Supplier, Product, Stock, StockMovement, AuthSession, now
+from .models import MAIN_WAREHOUSE_ID, MOVEMENT_TYPES, db, User, Category, Supplier, Product, Stock, StockMovement, AuthSession, now
 from .auth import require
+from .balances import get_warehouse, lock_writes, snapshot
 from .stock_service import movement
 from .validation import ApiError, text, integer, cents, email
 
@@ -22,17 +23,28 @@ def get(model, identifier):
         raise ApiError('Запис не знайдено.', 404)
     return value
 
-def paginate(query):
+def paginate(query, serialize=None):
     page = integer(request.args.get('page', 1), 'Сторінка', 1, 100000)
     size = integer(request.args.get('per_page', 25), 'Розмір сторінки', 1, 100)
     count = db.session.scalar(db.select(func.count()).select_from(query.order_by(None).subquery()))
-    rows = db.session.scalars(query.limit(size).offset((page - 1) * size)).unique().all()
-    return jsonify(items=[row.public() for row in rows], total=count, page=page, per_page=size)
+    window = query.limit(size).offset((page - 1) * size)
+    items = ([serialize(row) for row in db.session.execute(window).unique()]
+             if serialize else [row.public() for row in db.session.scalars(window).unique()])
+    return jsonify(items=items, total=count, page=page, per_page=size)
+
+def warehouse_filter():
+    return get_warehouse(request.args.get('warehouse_id', MAIN_WAREHOUSE_ID))
+
+def catalog_query(warehouse_id):
+    quantity = func.coalesce(Stock.quantity, 0)
+    query = db.select(Product, quantity.label('warehouse_quantity'), func.coalesce(Stock.revision, 0).label('stock_revision')).outerjoin(
+        Stock, and_(Stock.product_id == Product.id, Stock.warehouse_id == warehouse_id))
+    return query.where(Product.archived == False), quantity
 
 @api.get('/products')
 @require()
 def products():
-    query = db.select(Product).join(Stock).where(Product.archived == False)
+    query, quantity = catalog_query(warehouse_filter().id)
     search = request.args.get('q', '').strip().casefold()
     if search:
         escaped = search.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
@@ -41,17 +53,21 @@ def products():
         query = query.where(Product.category_id == integer(request.args['category_id'], 'Категорія', 1))
     status = request.args.get('status')
     if status == 'low':
-        query = query.where(Stock.quantity <= Product.min_stock)
+        query = query.where(quantity <= Product.min_stock)
     elif status == 'available':
-        query = query.where(Stock.quantity > Product.min_stock)
+        query = query.where(quantity > Product.min_stock)
     elif status == 'empty':
-        query = query.where(Stock.quantity == 0)
-    return paginate(query.order_by(Product.name_search, Product.id))
+        query = query.where(quantity == 0)
+    return paginate(query.order_by(Product.name_search, Product.id),
+                    lambda row: dict(**row[0].public(row[1]), stock_revision=row[2]))
 
 @api.get('/products/<int:identifier>')
 @require()
 def product_details(identifier):
-    return jsonify(get(Product, identifier).public())
+    warehouse = warehouse_filter()
+    product = get(Product, identifier)
+    balance, revision = snapshot(identifier, warehouse.id)
+    return jsonify(**product.public(balance), warehouse_id=warehouse.id, stock_revision=revision)
 
 def product_fields(product, data):
     product.name = text(data, 'name')
@@ -89,12 +105,11 @@ def edit_product(identifier):
 @api.delete('/products/<int:identifier>')
 @require('admin')
 def archive_product(identifier):
+    lock_writes()
     product = get(Product, identifier)
-    # Serialize with receipt/writeoff transactions before checking the balance.
-    db.session.execute(db.update(Stock).where(Stock.product_id == product.id).values(quantity=Stock.quantity))
-    quantity = db.session.scalar(db.select(Stock.quantity).where(Stock.product_id == product.id))
-    if quantity != 0:
-        raise ApiError('Перед архівацією потрібно списати залишок товару.', 409)
+    quantity = db.session.scalar(db.select(func.coalesce(func.sum(Stock.quantity), 0)).where(Stock.product_id == product.id))
+    if quantity:
+        raise ApiError('Перед архівацією потрібен нульовий залишок на всіх складах.', 409)
     product.archived = True
     db.session.commit()
     return jsonify(message='Товар архівовано. Історію збережено.')
@@ -172,14 +187,17 @@ def receipt():
 def writeoff():
     return jsonify(movement(body(), g.user, 'writeoff', request.headers.get('Idempotency-Key'))), 201
 
-@api.get('/stock/history')
-@require()
-def history():
+def history_query():
     query = db.select(StockMovement)
+    # An omitted warehouse returns the full journal; the UI sends its active warehouse.
+    if request.args.get('warehouse_id'):
+        query = query.where(StockMovement.warehouse_id == warehouse_filter().id)
     if request.args.get('product_id'):
         query = query.where(StockMovement.product_id == integer(request.args['product_id'], 'Товар', 1))
+    if request.args.get('document_id'):
+        query = query.where(StockMovement.document_id == integer(request.args['document_id'], 'Документ', 1))
     if request.args.get('type'):
-        if request.args['type'] not in ('receipt', 'writeoff'):
+        if request.args['type'] not in MOVEMENT_TYPES:
             raise ApiError('Невідомий тип операції.')
         query = query.where(StockMovement.type == request.args['type'])
     if request.args.get('q'):
@@ -192,23 +210,33 @@ def history():
             except ValueError:
                 raise ApiError('Дата має бути у форматі РРРР-ММ-ДД.')
             query = query.where(StockMovement.created_at >= value) if key == 'from' else query.where(StockMovement.created_at < value + timedelta(days=1))
-    return paginate(query.order_by(StockMovement.created_at.desc(), StockMovement.id.desc()))
+    return query
+
+@api.get('/stock/history')
+@require()
+def history():
+    return paginate(history_query().order_by(StockMovement.created_at.desc(), StockMovement.id.desc()))
 
 @api.get('/dashboard')
 @require()
 def dashboard():
-    rows = db.session.scalars(db.select(Product).where(Product.archived == False)).unique().all()
-    low = [p for p in rows if p.stock.quantity <= p.min_stock]
+    warehouse = warehouse_filter()
+    query, _ = catalog_query(warehouse.id)
+    rows = [(row[0], row[1]) for row in db.session.execute(query).unique()]
+    low = sorted([(p, qty) for p, qty in rows if qty <= p.min_stock], key=lambda row: (row[1], row[0].id))
     start = now().replace(hour=0, minute=0, second=0, microsecond=0)
     summary = []
     for days in range(6, -1, -1):
         day = start - timedelta(days=days)
-        totals = dict(db.session.execute(db.select(StockMovement.type, func.sum(StockMovement.quantity)).where(StockMovement.created_at >= day, StockMovement.created_at < day + timedelta(days=1)).group_by(StockMovement.type)).all())
+        totals = dict(db.session.execute(db.select(StockMovement.type, func.sum(StockMovement.quantity))
+                     .where(StockMovement.warehouse_id == warehouse.id, StockMovement.created_at >= day,
+                            StockMovement.created_at < day + timedelta(days=1)).group_by(StockMovement.type)).all())
         summary.append(dict(date=day.date().isoformat(), receipt=totals.get('receipt', 0), writeoff=totals.get('writeoff', 0)))
-    recent = db.session.scalars(db.select(StockMovement).order_by(StockMovement.created_at.desc(), StockMovement.id.desc()).limit(5)).unique().all()
-    return jsonify(products=len(rows), units=sum(p.stock.quantity for p in rows),
-                   value=sum(p.stock.quantity * p.price_cents for p in rows) / 100,
-                   low_count=len(low), low_products=[p.public() for p in sorted(low, key=lambda p: p.stock.quantity)[:5]],
+    recent = db.session.scalars(db.select(StockMovement).where(StockMovement.warehouse_id == warehouse.id)
+                                .order_by(StockMovement.created_at.desc(), StockMovement.id.desc()).limit(5)).all()
+    return jsonify(warehouse=warehouse.public(), products=len(rows), units=sum(qty for _, qty in rows),
+                   value=sum(qty * p.price_cents for p, qty in rows) / 100,
+                   low_count=len(low), low_products=[p.public(qty) for p, qty in low[:5]],
                    recent=[m.public() for m in recent], activity=summary)
 
 @api.get('/users')

@@ -15,7 +15,8 @@ def text(data, key, maximum=200, required=True):
     return value
 
 def integer(value, field='Кількість', minimum=0, maximum=1000000000):
-    if isinstance(value, bool) or not isinstance(value, (int, str)) or not re.fullmatch(r'\d+', str(value)):
+    if (isinstance(value, bool) or not isinstance(value, (int, str))
+            or isinstance(value, str) and (len(value) > 32 or not re.fullmatch(r'\d+', value))):
         raise ApiError(f'{field}: потрібне ціле число.')
     result = int(value)
     if not minimum <= result <= maximum:

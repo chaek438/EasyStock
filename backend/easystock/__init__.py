@@ -10,6 +10,8 @@ from werkzeug.security import generate_password_hash
 from .models import db
 from .validation import ApiError
 
+APP_VERSION = '1.1.0'
+
 @event.listens_for(Engine, 'connect')
 def sqlite_config(connection, _):
     if isinstance(connection, sqlite3.Connection):
@@ -31,8 +33,11 @@ def create_app(config=None):
     app.extensions['dummy_hash'] = generate_password_hash('invalid-account-password')
     from .auth import auth
     from .routes import api
+    from .warehouse_routes import warehouse_api
+    from .schema import ensure_schema
     app.register_blueprint(auth, url_prefix='/api')
     app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(warehouse_api, url_prefix='/api')
 
     @app.errorhandler(ApiError)
     def api_error(error):
@@ -67,7 +72,7 @@ def create_app(config=None):
 
     @app.get('/api/health')
     def health():
-        return jsonify(status='ok', app='EasyStock')
+        return jsonify(status='ok', app='EasyStock', version=APP_VERSION)
 
     @app.get('/')
     @app.get('/<path:path>')
@@ -84,13 +89,13 @@ def create_app(config=None):
     @app.cli.command('init-db')
     def init_db():
         """Create empty database tables (no demo accounts)."""
-        db.create_all()
+        ensure_schema()
         print('Database initialized.')
 
     @app.cli.command('seed-demo')
     def seed_demo_command():
         from .seed import seed_demo
-        db.create_all()
+        ensure_schema()
         seed_demo()
         print('Demo data ready. admin@easystock.local / DemoStock2026!')
 
@@ -100,7 +105,7 @@ def create_app(config=None):
         import click
         from .models import User
         from .validation import email
-        db.create_all()
+        ensure_schema()
         address = email(dict(email=click.prompt('Email')))
         password = click.prompt('Password (8+ characters)', hide_input=True, confirmation_prompt=True)
         if len(password) < 8:
