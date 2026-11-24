@@ -1,0 +1,10 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.35",nodesep="0.6",ranksep="0.65"];
+node [shape=box,style="filled",fillcolor="#EDF4F7",color="#31546B",fontname="DejaVu Sans",fontsize=17,margin="0.2,0.17"];
+edge [color="#31546B",fontname="DejaVu Sans",fontsize=12,penwidth=1.6];
+a [label="Браузер\nReact UI"];
+b [label="Flask API\nсеанс і CSRF"];
+c [label="Stock Service\nSQLAlchemy"];
+d [label="SQLite\nдані й аудит"];
+a -> b [label="HTTP / JSON"]; b -> c [label="перевірена дія"]; c -> d [label="транзакція"];
+}

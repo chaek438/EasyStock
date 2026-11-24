@@ -1,0 +1,14 @@
+@startuml
+left to right direction
+component "Браузер
+React UI" as UI
+component "Flask API
+сеанс і CSRF" as API
+component "Stock Service
+SQLAlchemy" as SVC
+database "SQLite
+дані й аудит" as DB
+UI --> API : HTTP / JSON
+API --> SVC : перевірена дія
+SVC --> DB : транзакція
+@enduml
