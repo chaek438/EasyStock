@@ -2,12 +2,13 @@ import pytest
 from easystock import create_app
 from easystock.models import db
 from easystock.seed import seed_demo
+from easystock.schema import ensure_schema
 
 @pytest.fixture
 def app(tmp_path):
     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + str(tmp_path / 'test.db')})
     with app.app_context():
-        db.create_all()
+        ensure_schema()
         seed_demo()
     yield app
     with app.app_context():

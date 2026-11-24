@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import event, inspect
 from sqlalchemy.exc import OperationalError
 from easystock.models import db, Stock, StockMovement, Receipt, StockRequest, User
+from easystock.schema import ensure_schema
 
 
 @pytest.mark.parametrize('kind, quantity, expected_balance', [
@@ -168,7 +169,7 @@ def test_additive_schema_upgrade_preserves_existing_data(app):
         db.session.remove()
         StockRequest.__table__.drop(db.engine)
         assert 'stock_requests' not in inspect(db.engine).get_table_names()
-        db.create_all()  # The same additive schema step used by start.py.
+        ensure_schema()  # The same schema step used by start.py.
         assert 'stock_requests' in inspect(db.engine).get_table_names()
         after = (db.session.query(User).count(), db.session.query(StockMovement).count(),
                  db.session.get(Stock, 1).quantity)
